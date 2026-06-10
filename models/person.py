@@ -1,7 +1,7 @@
 class Person:
     """Base class representing a general individual."""
     def __init__(self, name: str):
-        self._name = name
+        self.name = name
 
     @property
     def name(self) -> str:
@@ -9,9 +9,9 @@ class Person:
 
     @name.setter
     def name(self, value: str):
-        if not value.strip():
+        if not isinstance(value, str) or not value.strip():
             raise ValueError("Name cannot be empty.")
-        self._name = value
+        self._name = value.strip()
 
 
 class User(Person):
@@ -26,9 +26,9 @@ class User(Person):
 
     @email.setter
     def email(self, value: str):
-        if "@" not in value or "." not in value:
+        if not isinstance(value, str) or "@" not in value or "." not in value:
             raise ValueError("Invalid email format.")
-        self._email = value
+        self._email = value.strip()
 
     def to_dict(self) -> dict:
         """Serializes the User object to a dictionary."""
