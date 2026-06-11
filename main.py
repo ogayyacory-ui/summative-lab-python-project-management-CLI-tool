@@ -319,10 +319,10 @@ def handle_delete_task(args):
 
 EPILOG_EXAMPLES = """
 Examples:
-  main.py add-user --name "Alex Johnson" --email "alex@example.com"
-  main.py add-project --user "Alex Johnson" --title "CLI Tool" --description "Build a CLI" --due-date 2026-06-30
-  main.py add-task --project "CLI Tool" --title "Implement features" --assigned-to "Alex Johnson"
-  main.py list-projects --user "Alex Johnson"
+  main.py add-user --name "Alex Kimani" --email "alex@example.com"
+  main.py add-project --user "Alex Kimani" --title "CLI Tool" --description "Build a CLI" --due-date 2026-06-30
+  main.py add-task --project "CLI Tool" --title "Implement features" --assigned-to "Alex Kimani"
+  main.py list-projects --user "Alex Kimani"
   main.py complete-task --project "CLI Tool" --task "Implement features"
 """
 
