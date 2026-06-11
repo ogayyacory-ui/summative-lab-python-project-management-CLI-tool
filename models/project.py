@@ -2,13 +2,12 @@ from typing import List
 from models.task import Task
 
 class Project:
-    """Represents a Project containing multiple tasks assigned to a specific user ownership."""
+    """Represents a Project containing multiple tasks."""
     
-    def __init__(self, title: str, description: str, due_date: str, owner: str, tasks: List[Task] = None):
+    def __init__(self, title: str, description: str, due_date: str, tasks: List[Task] = None):
         self.title = title
         self.description = description
         self.due_date = due_date
-        self.owner = owner  # Links project to a User name (One-to-Many Relationship)
         self.tasks = tasks if tasks is not None else []
 
     @property
@@ -25,13 +24,16 @@ class Project:
         """Appends a new task to the project workspace."""
         self.tasks.append(task)
 
+    def find_task(self, title: str):
+        """Finds a task by title within this project."""
+        return next((task for task in self.tasks if task.title.lower() == title.lower()), None)
+
     def to_dict(self) -> dict:
         """Serializes the project object and nested task models into a dictionary."""
         return {
             "title": self.title,
             "description": self.description,
             "due_date": self.due_date,
-            "owner": self.owner,
             "tasks": [task.to_dict() for task in self.tasks]
         }
 
@@ -42,7 +44,6 @@ class Project:
         return cls(
             title=data["title"],
             description=data["description"],
-            due_date=data["due_date"],
-            owner=data["owner"],
+            due_date=data.get("due_date", "ASAP"),
             tasks=tasks
         )

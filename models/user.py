@@ -3,9 +3,10 @@ from models.person import Person
 class User(Person):
     """Represents a system User inheriting from Person (Demonstrating Inheritance)."""
     
-    def __init__(self, name: str, email: str):
+    def __init__(self, name: str, email: str, projects=None):
         super().__init__(name)
         self.email = email  # Triggers property setter validation
+        self.projects = projects if projects is not None else []
 
     @property
     def email(self) -> str:
@@ -21,12 +22,23 @@ class User(Person):
 
     def to_dict(self) -> dict:
         """Serializes the object to a dictionary for JSON conversion."""
-        return {"name": self.name, "email": self.email}
+        return {
+            "name": self.name,
+            "email": self.email,
+            "projects": [project.to_dict() for project in self.projects]
+        }
 
     @classmethod
     def from_dict(cls, data: dict):
         """Factory method to construct a User object from parsed JSON data."""
-        return cls(name=data["name"], email=data["email"])
+        from models.project import Project
+
+        projects = [Project.from_dict(p) for p in data.get("projects", [])]
+        return cls(name=data["name"], email=data["email"], projects=projects)
+
+    def add_project(self, project):
+        """Adds a project owned by this user."""
+        self.projects.append(project)
 
     def __repr__(self) -> str:
         return f"<User name='{self.name}', email='{self.email}'>"

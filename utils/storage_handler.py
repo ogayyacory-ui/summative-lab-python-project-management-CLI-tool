@@ -23,26 +23,28 @@ def load_data() -> tuple[List[User], List[Project], List[Task]]:
             raw_data = json.load(f)
             
         users = [User.from_dict(u) for u in raw_data.get("users", [])]
-        projects = [Project.from_dict(p) for p in raw_data.get("projects", [])]
-        tasks = [Task.from_dict(t) for t in raw_data.get("tasks", [])]
-        
-        # Re-establish relationships / sync embedded project tasks if any
-        for p in projects:
-            p.tasks = [t for t in tasks if t.project_title.lower() == p.title.lower()]
-            
+
+        # Backward compatibility for older files that stored projects at the top level.
+        for project_data in raw_data.get("projects", []):
+            owner = project_data.get("owner")
+            project = Project.from_dict(project_data)
+            if owner:
+                user = next((u for u in users if u.name.lower() == owner.lower()), None)
+                if user and not any(p.title.lower() == project.title.lower() for p in user.projects):
+                    user.add_project(project)
+
+        projects = [project for user in users for project in user.projects]
+        tasks = [task for project in projects for task in project.tasks]
         return users, projects, tasks
     except (json.JSONDecodeError, KeyError, FileNotFoundError):
         return [], [], []
 
-def save_data(users: List[User], projects: List[Project], tasks: List[Task] = None):
+def save_data(users: List[User], projects: List[Project] = None, tasks: List[Task] = None):
     """Persists current state updates atomically back down to local storage."""
     data_file = get_data_file()
-    tasks = tasks if tasks is not None else []
     os.makedirs(os.path.dirname(data_file), exist_ok=True)
     payload = {
-        "users": [u.to_dict() for u in users],
-        "projects": [p.to_dict() for p in projects],
-        "tasks": [t.to_dict() for t in tasks]
+        "users": [u.to_dict() for u in users]
     }
     with open(data_file, 'w') as f:
         json.dump(payload, f, indent=4)
