@@ -1,11 +1,21 @@
 class Task:
-    """Represents a discrete unit of work within a project."""
-    VALID_STATUSES = {"Pending", "Completed"}
+    """Represents an assignable unit of work within a Project with an incremental ID tracker."""
+    
+    _id_counter = 0
 
-    def __init__(self, title: str, assigned_to: str, status: str = "Pending"):
+    def __init__(self, title: str, project_title: str = "", assigned_to: str = "Unassigned", status: str = "Pending", task_id: int = None):
         self.title = title
+        self.project_title = project_title
         self.assigned_to = assigned_to
-        self.status = status  # e.g., Pending, Completed
+        self.status = status
+        
+        if task_id is not None:
+            self.task_id = task_id
+            if task_id > Task._id_counter:
+                Task._id_counter = task_id
+        else:
+            Task._id_counter += 1
+            self.task_id = Task._id_counter
 
     @property
     def title(self) -> str:
@@ -13,43 +23,28 @@ class Task:
 
     @title.setter
     def title(self, value: str):
-        if not isinstance(value, str) or not value.strip():
+        if not value.strip():
             raise ValueError("Task title cannot be empty.")
         self._title = value.strip()
 
-    @property
-    def assigned_to(self) -> str:
-        return self._assigned_to
-
-    @assigned_to.setter
-    def assigned_to(self, value: str):
-        if not isinstance(value, str) or not value.strip():
-            raise ValueError("Task assignee cannot be empty.")
-        self._assigned_to = value.strip()
-
-    @property
-    def status(self) -> str:
-        return self._status
-
-    @status.setter
-    def status(self, value: str):
-        if value not in self.VALID_STATUSES:
-            allowed = ", ".join(sorted(self.VALID_STATUSES))
-            raise ValueError(f"Task status must be one of: {allowed}.")
-        self._status = value
-
     def mark_complete(self):
-        """Updates the task status to Completed."""
         self.status = "Completed"
 
     def to_dict(self) -> dict:
-        """Serializes the Task object to a dictionary."""
-        return {"title": self.title, "assigned_to": self.assigned_to, "status": self.status}
+        return {
+            "task_id": self.task_id,
+            "title": self.title,
+            "project_title": self.project_title,
+            "assigned_to": self.assigned_to,
+            "status": self.status
+        }
 
     @classmethod
     def from_dict(cls, data: dict):
-        """Creates a Task instance from a dictionary."""
-        return cls(title=data["title"], assigned_to=data["assigned_to"], status=data.get("status", "Pending"))
-
-    def __repr__(self) -> str:
-        return f"<Task: {self.title} [{self.status}] -> Assigned to: {self.assigned_to}>"
+        return cls(
+            title=data["title"],
+            project_title=data.get("project_title", ""),
+            assigned_to=data.get("assigned_to", "Unassigned"),
+            status=data.get("status", "Pending"),
+            task_id=data.get("task_id")
+        )
