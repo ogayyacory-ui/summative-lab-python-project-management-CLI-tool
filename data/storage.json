@@ -1,3 +1,19 @@
 {
-    "users": []
+    "users": [
+        {
+            "name": "Ada",
+            "email": "ada@example.com",
+            "projects": []
+        },
+        {
+            "name": "John",
+            "email": "john@gmail.com",
+            "projects": []
+        },
+        {
+            "name": "Adrian",
+            "email": "addrian@gmail.com",
+            "projects": []
+        }
+    ]
 }
