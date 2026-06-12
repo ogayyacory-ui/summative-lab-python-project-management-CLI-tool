@@ -317,69 +317,37 @@ def handle_delete_task(args):
     console.print(f"[bold green]Success:[/bold green] Task '{args.task}' removed.")
 
 
-EPILOG_EXAMPLES = """
-Examples:
-  main.py add-user --name "Alex Kimani" --email "alex@example.com"
-  main.py add-project --user "Alex Kimani" --title "CLI Tool" --description "Build a CLI" --due-date 2026-06-30
-  main.py add-task --project "CLI Tool" --title "Implement features" --assigned-to "Alex Kimani"
-  main.py list-projects --user "Alex Kimani"
-  main.py complete-task --project "CLI Tool" --task "Implement features"
-"""
+DISPLAYED_COMMANDS = "{add-user,add-project,add-task,list-projects,list-users,complete-task}"
+VISIBLE_COMMANDS = {
+    "add-user",
+    "add-project",
+    "add-task",
+    "list-projects",
+    "list-users",
+    "complete-task",
+}
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Project Management CLI Tool - Manage users, projects, and tasks",
+        usage=f"%(prog)s [-h] {DISPLAYED_COMMANDS}",
+        description="Multi-User CLI Project tracker",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=EPILOG_EXAMPLES,
     )
 
-    subparsers = parser.add_subparsers(dest="command", title="Available commands", metavar="...")
+    subparsers = parser.add_subparsers(dest="command", metavar=DISPLAYED_COMMANDS)
 
-    p_add_user = subparsers.add_parser("add-user", help="Create a new user")
+    p_add_user = subparsers.add_parser("add-user", help="Register a new user")
     p_add_user.add_argument("--name", required=True)
     p_add_user.add_argument("--email", required=True)
     p_add_user.set_defaults(func=handle_add_user)
 
-    subparsers.add_parser("list-users", help="List all users").set_defaults(func=handle_list_users)
-
-    p_view_user = subparsers.add_parser("view-user", help="View user details")
-    p_view_user.add_argument("--name", required=True)
-    p_view_user.set_defaults(func=handle_view_user)
-
-    p_up_user = subparsers.add_parser("update-user", help="Update user information")
-    p_up_user.add_argument("--name", required=True)
-    p_up_user.add_argument("--email")
-    p_up_user.set_defaults(func=handle_update_user)
-
-    p_del_user = subparsers.add_parser("delete-user", help="Delete a user")
-    p_del_user.add_argument("--name", required=True)
-    p_del_user.set_defaults(func=handle_delete_user)
-
-    p_add_proj = subparsers.add_parser("add-project", help="Create a new project")
+    p_add_proj = subparsers.add_parser("add-project", help="Create a project for a user")
     p_add_proj.add_argument("--user", required=True)
     p_add_proj.add_argument("--title", required=True)
     p_add_proj.add_argument("--description", default="No description")
     p_add_proj.add_argument("--due-date", default="ASAP")
     p_add_proj.set_defaults(func=handle_add_project)
-
-    p_list_proj = subparsers.add_parser("list-projects", help="List projects")
-    p_list_proj.add_argument("--user", help="Filter projects by owner")
-    p_list_proj.set_defaults(func=handle_list_projects)
-
-    p_view_proj = subparsers.add_parser("view-project", help="View project details")
-    p_view_proj.add_argument("--title", required=True)
-    p_view_proj.set_defaults(func=handle_view_project)
-
-    p_up_proj = subparsers.add_parser("update-project", help="Update project information")
-    p_up_proj.add_argument("--title", required=True)
-    p_up_proj.add_argument("--description")
-    p_up_proj.add_argument("--due-date")
-    p_up_proj.set_defaults(func=handle_update_project)
-
-    p_del_proj = subparsers.add_parser("delete-project", help="Delete a project")
-    p_del_proj.add_argument("--title", required=True)
-    p_del_proj.set_defaults(func=handle_delete_project)
 
     p_add_task = subparsers.add_parser("add-task", help="Add a task to a project")
     p_add_task.add_argument("--project", required=True)
@@ -387,37 +355,74 @@ def main():
     p_add_task.add_argument("--assigned-to", default="Unassigned")
     p_add_task.set_defaults(func=handle_add_task)
 
-    p_list_tasks = subparsers.add_parser("list-tasks", help="List tasks")
+    p_list_proj = subparsers.add_parser("list-projects", help="Show projects and task progress")
+    p_list_proj.add_argument("--user", help="Filter projects by owner")
+    p_list_proj.set_defaults(func=handle_list_projects)
+
+    subparsers.add_parser("list-users", help="Show registered users").set_defaults(func=handle_list_users)
+
+    p_comp_task = subparsers.add_parser("complete-task", help="Mark a task as complete")
+    p_comp_task.add_argument("--project", required=True)
+    p_comp_task.add_argument("--task", required=True)
+    p_comp_task.set_defaults(func=handle_complete_task)
+
+    p_view_user = subparsers.add_parser("view-user", help=argparse.SUPPRESS)
+    p_view_user.add_argument("--name", required=True)
+    p_view_user.set_defaults(func=handle_view_user)
+
+    p_up_user = subparsers.add_parser("update-user", help=argparse.SUPPRESS)
+    p_up_user.add_argument("--name", required=True)
+    p_up_user.add_argument("--email")
+    p_up_user.set_defaults(func=handle_update_user)
+
+    p_del_user = subparsers.add_parser("delete-user", help=argparse.SUPPRESS)
+    p_del_user.add_argument("--name", required=True)
+    p_del_user.set_defaults(func=handle_delete_user)
+
+    p_view_proj = subparsers.add_parser("view-project", help=argparse.SUPPRESS)
+    p_view_proj.add_argument("--title", required=True)
+    p_view_proj.set_defaults(func=handle_view_project)
+
+    p_up_proj = subparsers.add_parser("update-project", help=argparse.SUPPRESS)
+    p_up_proj.add_argument("--title", required=True)
+    p_up_proj.add_argument("--description")
+    p_up_proj.add_argument("--due-date")
+    p_up_proj.set_defaults(func=handle_update_project)
+
+    p_del_proj = subparsers.add_parser("delete-project", help=argparse.SUPPRESS)
+    p_del_proj.add_argument("--title", required=True)
+    p_del_proj.set_defaults(func=handle_delete_project)
+
+    p_list_tasks = subparsers.add_parser("list-tasks", help=argparse.SUPPRESS)
     p_list_tasks.add_argument("--project", help="Filter tasks by project")
     p_list_tasks.set_defaults(func=handle_list_tasks)
 
-    p_view_task = subparsers.add_parser("view-task", help="View task details")
+    p_view_task = subparsers.add_parser("view-task", help=argparse.SUPPRESS)
     p_view_task.add_argument("--project", required=True)
     p_view_task.add_argument("--task", required=True)
     p_view_task.set_defaults(func=handle_view_task)
 
-    p_up_task = subparsers.add_parser("update-task", help="Update task information")
+    p_up_task = subparsers.add_parser("update-task", help=argparse.SUPPRESS)
     p_up_task.add_argument("--project", required=True)
     p_up_task.add_argument("--task", required=True)
     p_up_task.add_argument("--title")
     p_up_task.add_argument("--assigned-to")
     p_up_task.set_defaults(func=handle_update_task)
 
-    p_comp_task = subparsers.add_parser("complete-task", help="Mark task as completed")
-    p_comp_task.add_argument("--project", required=True)
-    p_comp_task.add_argument("--task", required=True)
-    p_comp_task.set_defaults(func=handle_complete_task)
-
-    p_assign_task = subparsers.add_parser("assign-task", help="Assign task to user")
+    p_assign_task = subparsers.add_parser("assign-task", help=argparse.SUPPRESS)
     p_assign_task.add_argument("--project", required=True)
     p_assign_task.add_argument("--task", required=True)
     p_assign_task.add_argument("--user", required=True)
     p_assign_task.set_defaults(func=handle_assign_task)
 
-    p_del_task = subparsers.add_parser("delete-task", help="Delete a task")
+    p_del_task = subparsers.add_parser("delete-task", help=argparse.SUPPRESS)
     p_del_task.add_argument("--project", required=True)
     p_del_task.add_argument("--task", required=True)
     p_del_task.set_defaults(func=handle_delete_task)
+
+    subparsers._choices_actions = [
+        action for action in subparsers._choices_actions if action.dest in VISIBLE_COMMANDS
+    ]
 
     if len(sys.argv) == 1:
         parser.print_help()
